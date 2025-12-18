@@ -96,4 +96,4 @@ Email: [parksh4772@gmail.com]
 
 Location: Seoul, South Korea
 
-Portfolio: https://saeheon.github.io
+Portfolio: [https://parksh4772.github.io]
