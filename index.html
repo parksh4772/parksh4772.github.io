@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html lang="ko"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>박세헌 | 시니어 풀스택 보안 엔지니어 포트폴리오</title> <script src="https://cdn.tailwindcss.com"></script> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <style> @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+    body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background-color: #f8fafc; /* slate-50 */
+        color: #1e293b; /* slate-800 */
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9; 
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #94a3b8; 
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; 
+    }
+
+    /* Chart Container Strategy */
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+    }
+    @media (min-width: 768px) {
+        .chart-container {
+            height: 350px;
+        }
+    }
+
+    /* Interactive Elements */
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .timeline-line {
+        position: absolute;
+        left: 24px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #cbd5e1;
+        z-index: 0;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+<!-- Chosen Palette: Trusted Navy & Professional Gray (신뢰감을 주는 네이비와 차분한 그레이) -->
+<!-- Application Structure Plan: 
+     1. Header: 핵심 가치 제안 (11년차, 보안, 풀스택)
+     2. Executive Summary Dashboard: 핵심 지표(연차, 프로젝트 수 등)와 기술 스택 분포(Chart.js)
+     3. Career Timeline (Interactive): 경력의 흐름을 클릭하여 상세 내용을 볼 수 있는 타임라인 구조. 일본/한국 경력 구분.
+     4. Key Projects (Deep Dive): 사용자가 선택한 핵심 프로젝트(방화벽, PKI, ElasticSearch)의 문제-해결 과정을 시각화.
+     5. Future Vision: 데이터 사이언스 및 AI 학습 현황 시각화.
+     이 구조는 채용 담당자가 '기술적 깊이'와 '비즈니스 기여도'를 빠르게 파악할 수 있도록 설계됨.
+-->
+<!-- Visualization & Content Choices:
+     - Tech Stack: Radar/Bar Chart to show breadth and depth.
+     - Domain Experience: Doughnut Chart to show balance between Security, SI, and Infra.
+     - Project Impact: Interactive cards that reveal details on click (No SVG, purely DOM manipulation).
+     - Justification: Charts provide instant visual proof of 'Full-stack' claims. Interactive timeline engages the user to explore the history.
+-->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head> <body class="bg-slate-50 text-slate-800">
+
+<!-- Navigation -->
+<nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <span class="font-bold text-xl tracking-tight">Park Sae-heon</span>
+                <span class="ml-2 text-slate-400 text-sm hidden sm:block">| Senior Security Engineer</span>
+            </div>
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-baseline space-x-4">
+                    <button onclick="scrollToSection('dashboard')" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">대시보드</button>
+                    <button onclick="scrollToSection('skills')" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">기술 스택</button>
+                    <button onclick="scrollToSection('career')" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">경력 타임라인</button>
+                    <button onclick="scrollToSection('projects')" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">핵심 프로젝트</button>
+                </div>
+            </div>
+            <div class="-mr-2 flex md:hidden">
+                <!-- Mobile menu button -->
+                <button type="button" onclick="toggleMobileMenu()" class="bg-slate-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-slate-700 focus:outline-none">
+                    <span class="text-xl">☰</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-slate-800">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <button onclick="scrollToSection('dashboard')" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left">대시보드</button>
+            <button onclick="scrollToSection('skills')" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left">기술 스택</button>
+            <button onclick="scrollToSection('career')" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left">경력 타임라인</button>
+            <button onclick="scrollToSection('projects')" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left">핵심 프로젝트</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Header / Hero Section -->
+<header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+        <div class="mb-6 md:mb-0">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                기술로 비즈니스를 보호하는<br>
+                <span class="text-blue-700">11년차 시니어 풀스택 보안 엔지니어</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl leading-relaxed mt-4">
+                시스템 설계부터 보안 솔루션 고도화까지 전 과정을 책임집니다.<br>
+                <strong>Java(Spring Boot)</strong>와 <strong>Python(FastAPI)</strong>을 넘나들며,<br> 데이터 기반의 지능형 보안 시스템을 지향합니다.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">🛡️ Security Architecture</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">🚀 Performance Optimization</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">🇯🇵 Global Experience</span>
+            </div>
+        </div>
+        <!-- Profile Summary Card -->
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-md w-full md:w-80">
+            <div class="text-center">
+                <div class="mx-auto h-24 w-24 rounded-full bg-slate-200 flex items-center justify-center text-4xl shadow-inner mb-4">
+                    👨‍💻
+                </div>
+                <h3 class="font-bold text-xl text-slate-800">박세헌</h3>
+                <p class="text-slate-500 mb-4">Senior Security Engineer</p>
+                <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-left bg-white p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-500">경력</span> <span class="font-semibold text-right">11년</span>
+                    <span class="text-slate-500">주 기술</span> <span class="font-semibold text-right">Java, Python</span>
+                    <span class="text-slate-500">거주지</span> <span class="font-semibold text-right">서울 강서구</span>
+                    <span class="text-slate-500">언어</span> <span class="font-semibold text-right">한국어, 일본어</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-16">
+
+    <!-- 1. Dashboard Section -->
+    <section id="dashboard" class="fade-in">
+        <div class="mb-8 border-l-4 border-blue-600 pl-4">
+            <h2 class="text-2xl font-bold text-slate-800">커리어 대시보드</h2>
+            <p class="text-slate-500 mt-1">전체 경력의 기술적 분포와 핵심 역량 요약</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Stat Cards -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow border-t-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium uppercase">Total Career</p>
+                        <h3 class="text-3xl font-bold text-slate-800">11<span class="text-lg font-normal text-slate-500 ml-1">년</span></h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600 text-2xl">💼</div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">2014년 - 현재 (인프라 ~ 보안 솔루션)</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow border-t-4 border-indigo-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium uppercase">Global Exp</p>
+                        <h3 class="text-3xl font-bold text-slate-800">3.5<span class="text-lg font-normal text-slate-500 ml-1">년</span></h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 text-2xl">🌏</div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">일본 도쿄/요코하마 설계 및 개발</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow border-t-4 border-emerald-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium uppercase">Domain</p>
+                        <h3 class="text-3xl font-bold text-slate-800">Security</h3>
+                    </div>
+                    <div class="p-3 rounded-full bg-emerald-100 text-emerald-600 text-2xl">🔒</div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">PKI, 방화벽, 로그분석 Expert</p>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-bold text-slate-700 mb-4 text-center">도메인 경험 분포</h3>
+                <div class="chart-container">
+                    <canvas id="domainChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-bold text-slate-700 mb-4 text-center">주요 기술 활용 비중</h3>
+                <div class="chart-container">
+                    <canvas id="techChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Technical Skills Section -->
+    <section id="skills" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 fade-in">
+        <div class="mb-6 border-l-4 border-indigo-600 pl-4">
+            <h2 class="text-2xl font-bold text-slate-800">기술 스택 (Tech Stack)</h2>
+            <div class="mt-2 flex flex-wrap gap-4 text-sm">
+                <button onclick="filterSkills('all')" class="text-indigo-600 font-bold hover:underline">전체 보기</button>
+                <button onclick="filterSkills('backend')" class="text-slate-500 hover:text-indigo-600 hover:underline transition">Backend</button>
+                <button onclick="filterSkills('security')" class="text-slate-500 hover:text-indigo-600 hover:underline transition">Security & Data</button>
+            </div>
+        </div>
+
+        <div id="skills-container" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Backend Skills -->
+            <div class="skill-group" data-category="backend">
+                <h4 class="text-md font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">Backend & Framework</h4>
+                <div class="space-y-5">
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-slate-700">Java (Spring Boot)</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">11 Years / Expert</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full shadow-sm" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-slate-700">Python (FastAPI)</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Intermediate (Recent Focus)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-yellow-500 h-2 rounded-full shadow-sm" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-slate-700">PHP (Laravel)</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Advanced</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-purple-500 h-2 rounded-full shadow-sm" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security & Data Skills -->
+            <div class="skill-group" data-category="security">
+                <h4 class="text-md font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">Security, Data & Infra</h4>
+                <div class="space-y-5">
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-slate-700">DB (MariaDB, Oracle, MySQL)</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Advanced</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-slate-600 h-2 rounded-full shadow-sm" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-slate-700">ElasticSearch (Log Analysis)</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Optimization Level</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full shadow-sm" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <!-- Skill Item -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-slate-700">Linux Infra & TCP/IP</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Experienced</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-slate-500 h-2 rounded-full shadow-sm" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Learning Chips -->
+        <div class="mt-8 pt-6 border-t border-slate-100">
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wide mb-3">Certifications & Learning</h4>
+            <div class="flex flex-wrap gap-3">
+                <span class="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-sm text-slate-700 shadow-sm flex items-center">📊 통계검정 2급 (보유)</span>
+                <span class="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-sm text-slate-700 shadow-sm flex items-center">🐍 Python3 Engineer (보유)</span>
+                <span class="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-sm text-slate-700 shadow-sm flex items-center">🔐 정보보안기사 (준비중)</span>
+                <span class="px-4 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full text-sm text-indigo-700 shadow-sm flex items-center">🤖 ML (Scikit-learn, Keras) 학습중</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Career Timeline Section -->
+    <section id="career" class="fade-in">
+        <div class="mb-8 border-l-4 border-emerald-600 pl-4">
+            <h2 class="text-2xl font-bold text-slate-800">경력 히스토리 (Career Timeline)</h2>
+            <p class="text-slate-500 mt-1">11년의 여정, 인프라에서 보안 아키텍처까지</p>
+        </div>
+
+        <div class="relative pl-6 sm:pl-10 py-2" id="timeline-container">
+            <div class="timeline-line"></div>
+            <!-- Dynamic Content Loaded via JS -->
+        </div>
+    </section>
+
+    <!-- 4. Key Projects (Deep Dive) -->
+    <section id="projects" class="fade-in">
+        <div class="mb-8 border-l-4 border-red-500 pl-4">
+            <h2 class="text-2xl font-bold text-slate-800">핵심 문제 해결 사례 (Key Projects)</h2>
+            <p class="text-slate-500 mt-1">기술적 난제를 해결하고 시스템을 최적화한 주요 사례입니다.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Project 1 -->
+            <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col h-full card-hover">
+                <div class="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-lg">🔥 방화벽 정책 관리 모듈</h3>
+                    <span class="text-xs font-mono bg-slate-800 text-white px-2 py-1 rounded">Java / Spring Boot</span>
+                </div>
+                <div class="p-5 flex-1">
+                    <h4 class="font-bold text-blue-800 mb-2">이기종 방화벽 정책 통합 관리 시스템 독자 개발</h4>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        다양한 벤더의 방화벽 정책을 통합 관리해야 하는 난제를 해결하기 위해, 
+                        정책 신청부터 승인, 배포까지의 생명 주기를 관리하는 모듈을 <strong>직접 설계 및 구축</strong>하였습니다.
+                    </p>
+                    <div class="bg-blue-50 p-3 rounded text-sm text-blue-900">
+                        <strong>Impact:</strong> 표준화된 정책 모델 설계로 운영 효율 극대화 및 프로세스 자동화 달성
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 2 -->
+            <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col h-full card-hover">
+                <div class="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-lg">🔍 대용량 로그 최적화</h3>
+                    <span class="text-xs font-mono bg-green-600 text-white px-2 py-1 rounded">Laravel / ElasticSearch</span>
+                </div>
+                <div class="p-5 flex-1">
+                    <h4 class="font-bold text-blue-800 mb-2">AnymonFM 로그 분석 성능 고도화</h4>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        RDBMS 검색 한계를 극복하기 위해 기 도입된 ElasticSearch를 서비스 로직에 최적화하여 연동했습니다. 
+                        PHP(Laravel)와 ES 간의 쿼리 인터페이스를 재설계했습니다.
+                    </p>
+                    <div class="bg-green-50 p-3 rounded text-sm text-green-900">
+                        <strong>Impact:</strong> 검색 속도 비약적 향상, 실시간 보안 관제 환경 마련
+                    </div>
+                </div>
+            </div>
+
+             <!-- Project 3 -->
+             <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col h-full card-hover">
+                <div class="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-lg">🐍 라이선스 자동화</h3>
+                    <span class="text-xs font-mono bg-yellow-600 text-white px-2 py-1 rounded">Python / FastAPI</span>
+                </div>
+                <div class="p-5 flex-1">
+                    <h4 class="font-bold text-blue-800 mb-2">PKI 기반 제품 라이선스 갱신 모듈 구축</h4>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        PKI 보안 제품의 라이선스 갱신 및 유효성 검증 프로세스를 자동화하기 위해 
+                        <strong>FastAPI</strong>를 도입, 경량화된 고성능 API 서버를 구축했습니다.
+                    </p>
+                    <div class="bg-yellow-50 p-3 rounded text-sm text-yellow-900">
+                        <strong>Impact:</strong> 갱신 프로세스 완전 자동화, 운영 리스크 감소
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 4 (S1) -->
+            <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col h-full card-hover">
+                <div class="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-lg">📱 S1 모바일 게이트 연동</h3>
+                    <span class="text-xs font-mono bg-indigo-600 text-white px-2 py-1 rounded">Java / Socket / AES</span>
+                </div>
+                <div class="p-5 flex-1">
+                    <h4 class="font-bold text-blue-800 mb-2">모바일 사원증 연동 및 게이트 제어 시스템</h4>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        SDK만 있는 상태에서 <strong>TCP/IP 소켓 통신 모듈</strong>을 풀 스크래치(Full-scratch)로 개발했습니다. 
+                        데이터 전송 시 AES 암호화를 적용하고, 비동기 처리를 통해 지연 시간을 최소화했습니다.
+                    </p>
+                    <div class="bg-indigo-50 p-3 rounded text-sm text-indigo-900">
+                        <strong>Impact:</strong> 안정적인 출입 제어 시스템 구축, 보안성 및 응답 속도 확보
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center pt-16 pb-8 border-t border-slate-200 mt-10">
+        <h3 class="text-xl font-bold text-slate-800 mb-2">Ready to work together?</h3>
+        <p class="text-slate-500 mb-8 max-w-lg mx-auto">11년의 경험과 데이터 기반의 통찰력으로 귀사의 보안 시스템을 한 단계 업그레이드하겠습니다.</p>
+        <div class="flex justify-center gap-4 mb-6">
+            <a href="mailto:your.email@example.com" class="bg-blue-600 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg flex items-center">
+                ✉️ Email Me
+            </a>
+            <a href="[https://github.com/saeheon](https://github.com/saeheon)" target="_blank" class="bg-slate-800 text-white px-6 py-3 rounded-full font-bold hover:bg-slate-900 transition shadow-lg flex items-center">
+                💻 GitHub
+            </a>
+        </div>
+        <p class="text-xs text-slate-400">© 2025 Park Sae-heon. All rights reserved.</p>
+    </footer>
+
+    </main>
+
+        <script>
+            // Data for Timeline
+            const careerData = [
+                {
+                    company: "(주)유넷시스템",
+                    period: "2021.01 ~ 현재",
+                    role: "보안 솔루션 시니어 개발자 / 책임",
+                    summary: "보안 제품군 핵심 모듈 개발 및 대형 고객사(S1) SI 파견",
+                    location: "한국, 서울",
+                    details: [
+                        "방화벽 정책 관리 시스템 독자 설계 및 구축 (Java, Spring Boot)",
+                        "PKI 제품 라이선스 갱신/검증 API 개발 (Python, FastAPI)",
+                        "AnymonFM 대용량 로그 분석 성능 최적화 (Laravel, ElasticSearch)",
+                        "에스원(S1) 보안 게이트 연동 프로그램 신규 개발 및 유지보수 (Socket, AES)"
+                    ],
+                    active: true
+                },
+                {
+                    company: "NEXTURE (일본)",
+                    period: "2017.10 ~ 2019.10",
+                    role: "시니어 풀스택 엔지니어 / PL",
+                    summary: "일본 현지 SI 프로젝트 설계 상류 공정 및 리딩",
+                    location: "일본, 요코하마 (노무라연구소)",
+                    details: [
+                        "편의점 택배 관리 시스템 기본/상세 설계 및 스케줄 관리",
+                        "대규모 물류 시스템 Java 마이그레이션 아키텍처 설계",
+                        "DB 정의서 관리 및 비즈니스 로직 최적화"
+                    ],
+                    active: false
+                },
+                {
+                    company: "Arrow Information (일본)",
+                    period: "2016.06 ~ 2017.09",
+                    role: "Java 백엔드 개발자",
+                    summary: "레거시 마이그레이션 및 대규모 시스템 구축",
+                    location: "일본, 도쿄",
+                    details: [
+                        "사원 정보 및 재고 관리 시스템 COBOL → Java 컨버전 수행",
+                        "전 과정(단위~통합) 테스트 주도 및 품질 관리",
+                        "JSP, jQuery 활용 프론트엔드/백엔드 통합 개발"
+                    ],
+                    active: false
+                },
+                {
+                    company: "(주)유호스트",
+                    period: "2014.08 ~ 2016.04",
+                    role: "인프라 엔지니어",
+                    summary: "IDC 인프라 구축 및 시스템 운영",
+                    location: "한국, 서울",
+                    details: [
+                        "서버 호스팅 인프라 구축 및 네트워크 설정",
+                        "Linux/Windows Server OS 설치 및 장애 모니터링(Zabbix)",
+                        "고객 요구사항에 따른 하드웨어 스펙 산정 및 기술 지원"
+                    ],
+                    active: false
+                }
+            ];
+
+            // 1. Render Timeline
+            function renderTimeline() {
+                const container = document.getElementById('timeline-container');
+                // Keep the line
+                const line = container.querySelector('.timeline-line');
+                if(line) container.innerHTML = ''; // clear only if rerendering
+                else container.innerHTML = '<div class="timeline-line"></div>';
+
+                careerData.forEach((job, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'relative mb-10 cursor-pointer group';
+                    item.onclick = () => toggleTimelineDetail(index);
+
+                    // Dot
+                    const dotColor = index === 0 ? 'bg-blue-600 border-blue-200' : 'bg-slate-300 border-slate-100';
+                    
+                    item.innerHTML = `
+                        <div class="absolute left-0 -ml-2.5 w-6 h-6 rounded-full border-4 ${dotColor} z-10 transition-colors group-hover:bg-blue-500 bg-white"></div>
+                        
+                        <div class="bg-white p-5 rounded-lg shadow-sm border border-slate-200 ml-8 card-hover group-hover:border-blue-300 transition-all">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                                <h3 class="text-lg font-bold text-slate-800">${job.company}</h3>
+                                <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded mt-1 sm:mt-0">${job.period}</span>
+                            </div>
+                            <div class="text-sm text-slate-600 font-medium mb-1">${job.role} <span class="text-slate-400 mx-1">|</span> ${job.location}</div>
+                            <p class="text-sm text-slate-500 mb-3">${job.summary}</p>
+                            
+                            <div id="detail-${index}" class="${index === 0 ? 'block' : 'hidden'} mt-4 pt-4 border-t border-slate-100 bg-slate-50 p-3 rounded text-sm text-slate-700 fade-in">
+                                <ul class="list-disc pl-4 space-y-1">
+                                    ${job.details.map(d => `<li>${d}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="text-center mt-2 text-xs text-slate-400 group-hover:text-blue-500 transition-colors">
+                                ${index === 0 ? '▲ 접기' : '▼ 상세 보기'}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            function toggleTimelineDetail(index) {
+                const detail = document.getElementById(`detail-${index}`);
+                const isHidden = detail.classList.contains('hidden');
+                
+                // Toggle
+                if (isHidden) {
+                    detail.classList.remove('hidden');
+                    detail.classList.add('block');
+                } else {
+                    detail.classList.remove('block');
+                    detail.classList.add('hidden');
+                }
+            }
+
+            // 2. Render Charts
+            function initCharts() {
+                // Domain Chart
+                const ctxDomain = document.getElementById('domainChart').getContext('2d');
+                new Chart(ctxDomain, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Security Solution', 'SI Integration', 'Infrastructure'],
+                        datasets: [{
+                            data: [50, 35, 15], 
+                            backgroundColor: ['#2563eb', '#64748b', '#cbd5e1'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                        },
+                        cutout: '70%'
+                    }
+                });
+
+                // Tech Chart (Horizontal Bar)
+                const ctxTech = document.getElementById('techChart').getContext('2d');
+                new Chart(ctxTech, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Java/Spring', 'Python/FastAPI', 'PHP/Laravel', 'DB/SQL', 'Infra/Linux'],
+                        datasets: [{
+                            label: 'Proficiency',
+                            data: [95, 75, 80, 90, 70],
+                            backgroundColor: [
+                                '#1e40af', // Java
+                                '#fbbf24', // Python
+                                '#a855f7', // PHP
+                                '#475569', // DB
+                                '#94a3b8'  // Infra
+                            ],
+                            borderRadius: 4,
+                            barThickness: 25
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { beginAtZero: true, max: 100, grid: { display: false } },
+                            y: { grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // 3. Simple Interaction Functions
+            function scrollToSection(id) {
+                const element = document.getElementById(id);
+                if (element) {
+                    const headerOffset = 80;
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+                toggleMobileMenu(false); // Close menu if open
+            }
+
+            function toggleMobileMenu(forceState) {
+                const menu = document.getElementById('mobile-menu');
+                if (forceState !== undefined) {
+                    if (forceState) menu.classList.remove('hidden');
+                    else menu.classList.add('hidden');
+                } else {
+                    menu.classList.toggle('hidden');
+                }
+            }
+
+            function filterSkills(category) {
+                const groups = document.querySelectorAll('.skill-group');
+                groups.forEach(group => {
+                    if (category === 'all' || group.dataset.category === category) {
+                        group.style.display = 'block';
+                        group.classList.add('fade-in');
+                    } else {
+                        group.style.display = 'none';
+                        group.classList.remove('fade-in');
+                    }
+                });
+            }
+
+            // Initialize
+            window.addEventListener('load', () => {
+                renderTimeline();
+                initCharts();
+            });
+
+        </script>
+</body> 
+</html>
